@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { RendererBluetoothHelper } from "./renderer_bluetooth_helper";
+import { Utils } from "./utils";
 
 const renderBluetoothHelper = new RendererBluetoothHelper();
 
@@ -15,40 +16,37 @@ const toSendData = ref("DBF0A8010B464C534D20465232303000DFDE");
 
 const receiveData = ref("");
 
+/**
+ * vue刷新设备
+ */
 function refreshDevice() {
   console.log("refreshDevice:");
   renderBluetoothHelper.requestDevices("", "");
 }
 
+/**
+ * vue连接设备
+ */
 function connectDevice() {
   console.log("selectedDeviceId", selectedDeviceId.value);
   if (selectedDeviceId.value === "") return;
   renderBluetoothHelper.connectDevice(selectedDeviceId.value);
 }
 
+/**
+ * vue发送数据
+ */
 function sendData() {
   receiveData.value =
-    receiveData.value + `\n${getDateTime()}  发送：${toSendData.value}`;
+    receiveData.value +
+    `\n${Utils.getFormatDateTime()}  发送：${toSendData.value}`;
 
   console.log("sendData", toSendData.value);
   if (toSendData.value === "") return;
   renderBluetoothHelper.sendData(toSendData.value);
 }
 
-function getDateTime() {
-  const date = new Date();
-  const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
-    .toString()
-    .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}-${date
-    .getHours()
-    .toString()
-    .padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date
-    .getSeconds()
-    .toString()
-    .padStart(2, "0")}`;
-  return formattedDate;
-}
-
+// vue初始化完毕
 onMounted(() => {
   renderBluetoothHelper.init();
   renderBluetoothHelper.setCallbacks(
@@ -68,7 +66,7 @@ onMounted(() => {
       console.log("receve data:", data);
       receiveData.value = `${
         receiveData.value
-      }\n${getDateTime()} 接收：${data}\n`;
+      }\n${Utils.getFormatDateTime()} 接收：${data}\n`;
     }
   );
 });

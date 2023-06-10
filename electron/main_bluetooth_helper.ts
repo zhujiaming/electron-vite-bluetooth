@@ -2,11 +2,18 @@ import { BrowserWindow, ipcMain } from "electron";
 
 const TAG = "MainBlueToothHelper";
 
+/**
+ * 主进程的BLE控制帮助类
+ */
 export class MainBlueToothHelper {
   win: BrowserWindow | undefined;
   selectedId: string | undefined;
   selectBluetoothCallback: Function | undefined;
 
+  /**
+   * 初始化BLE设备监听相关
+   * @param _win 关联的BrowserWindow
+   */
   init(_win: BrowserWindow): void {
     this.win = _win;
     this.win.webContents.on(
@@ -55,6 +62,9 @@ export class MainBlueToothHelper {
     console.log(`${TAG} init`);
   }
 
+  /**
+   * 销毁连接资源
+   */
   destroy(): void {
     if (this.selectBluetoothCallback) {
       this.selectBluetoothCallback("");
@@ -67,6 +77,11 @@ export class MainBlueToothHelper {
     console.log(`${TAG} destroy`);
   }
 
+  /**
+   * 发送数据到渲染进程
+   * @param channel
+   * @param args
+   */
   _sendToRenderer(channel: string, args: any) {
     if (this.win && !this.win.isDestroyed()) {
       this.win.webContents.send(channel, args);

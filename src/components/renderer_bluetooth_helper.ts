@@ -1,10 +1,14 @@
 import { ipcRenderer } from "electron";
+import { Utils } from "./utils";
 
 console.log(`ipcRenderer: ${ipcRenderer}`);
 type TypeFuncDeviceList = (deviceInfos: Array<any>) => void;
 type TypeFuncDeviceSelect = (device: any) => void;
 type TypeFuncOnBluetoothReceive = (event: any) => void;
 
+/**
+ * 渲染进程的BLE控制帮助类
+ */
 export class RendererBluetoothHelper {
   _continueReceive = true;
 
@@ -22,6 +26,9 @@ export class RendererBluetoothHelper {
   _onDeviceConnect: TypeFuncDeviceSelect | undefined;
   _onBluetoothReceive: TypeFuncOnBluetoothReceive | undefined;
 
+  /**
+   * 重置连接参数
+   */
   reset() {
     this.deviceInfos = new Map();
     this.selectId = null;
@@ -35,6 +42,9 @@ export class RendererBluetoothHelper {
     this._onBluetoothReceive = undefined;
   }
 
+  /**
+   * 初始化BLE连接监听等
+   */
   init() {
     this.reset();
     ipcRenderer.on("receivedDeviceList", (_, deviceList) => {
@@ -42,7 +52,7 @@ export class RendererBluetoothHelper {
         return;
       }
       if (deviceList && deviceList.length > 0) {
-        this.getDeviceListChanagedLisenter()([]);
+        this._getDeviceListChanagedLisenter()([]);
         let deviceInfo;
         for (let i = 0; i < deviceList.length; i++) {
           deviceInfo = deviceList[i];
@@ -56,13 +66,19 @@ export class RendererBluetoothHelper {
             }
           }
         }
-        this.getDeviceListChanagedLisenter()(
+        this._getDeviceListChanagedLisenter()(
           Array.from(this.deviceInfos!.values())
         );
       }
     });
   }
 
+  /**
+   * 请求刷新附近BLE列表
+   * @param suuid 条件过滤BLE列表里的optionalServices
+   * @param namePrefix 条件过滤BLE列表里的namePrefix，即标识名称前缀
+   * @returns
+   */
   async requestDevices(suuid: string, namePrefix: string) {
     this._continueReceive = true;
     setTimeout(() => {
@@ -107,12 +123,19 @@ export class RendererBluetoothHelper {
     return this.selectDevice;
   }
 
+  /**
+   * 请求连接BLE设备
+   * @param selectId BLE设备的mac地址
+   */
   async connectDevice(selectId: string) {
     console.log("selectId:", selectId);
     this.selectId = selectId;
     if (selectId) ipcRenderer.send("select-bluetooth-request", selectId);
   }
 
+  /**
+   * 断开连接设备
+   */
   async disconnectDevice() {
     if (this.selectDevice) {
       console.log("try disconnect");
@@ -126,6 +149,10 @@ export class RendererBluetoothHelper {
     ipcRenderer.send("cancel-bluetooth-request");
   }
 
+  /**
+   * 发送数据到BLE设备
+   * @param hexString 16进制数据字符串
+   */
   async sendData(hexString: string) {
     if (this.characteristicsForSend) {
       console.log("chaacteristis sendData");
@@ -144,6 +171,12 @@ export class RendererBluetoothHelper {
     }
   }
 
+  /**
+   * 设置相关状态监听，用于刷新View
+   * @param callbackDeviceListChanged 附近的BLE设备列表数据回调
+   * @param callbackOndeviceConnect BLE设备被选中连接回调
+   * @param callbackBluetoothReceive BLE设备返回数据回调
+   */
   setCallbacks(
     callbackDeviceListChanged: TypeFuncDeviceList,
     callbackOndeviceConnect: TypeFuncDeviceSelect,
@@ -154,11 +187,11 @@ export class RendererBluetoothHelper {
     this._onBluetoothReceive = callbackBluetoothReceive;
   }
 
-  getDeviceListChanagedLisenter() {
+  _getDeviceListChanagedLisenter() {
     return this._onDeviceListChanged ?? function () {};
   }
 
-  removeDeviceListChanagedLisenter() {
+  _removeDeviceListChanagedLisenter() {
     this._onDeviceListChanged = undefined;
   }
 
@@ -203,7 +236,7 @@ export class RendererBluetoothHelper {
             );
             if (event.target.value) {
               try {
-                const hexRet = RendererBluetoothHelper.arrayBufferToHexString(
+                const hexRet = Utils.arrayBufferToHexString(
                   event.target.value.buffer
                 );
                 console.log("===>ret hexRet:", hexRet);
@@ -219,13 +252,5 @@ export class RendererBluetoothHelper {
         this.characteristicsForListen.startNotifications();
       }
     }
-  }
-
-  static arrayBufferToHexString(buffer: ArrayBuffer) {
-    const uint8Array = new Uint8Array(buffer);
-    const hexString = Array.from(uint8Array)
-      .map((b) => ("00" + b.toString(16)).slice(-2))
-      .join(" ");
-    return hexString;
   }
 }
