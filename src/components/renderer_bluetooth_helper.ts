@@ -101,8 +101,8 @@ export class RendererBluetoothHelper {
     } else {
       config = { filters };
     }
-
-    config = { acceptAllDevices: true };
+    // config = { acceptAllDevices: true };
+    console.log("start requestDevice,config:", config);
     // @ts-ignore
     const device = await navigator.bluetooth.requestDevice(config);
     this.selectDevice = device;

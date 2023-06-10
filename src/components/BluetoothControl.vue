@@ -21,7 +21,7 @@ const receiveData = ref("");
  */
 function refreshDevice() {
   console.log("refreshDevice:");
-  renderBluetoothHelper.requestDevices("", "");
+  renderBluetoothHelper.requestDevices(textSuuid.value, textNamePrefix.value);
 }
 
 /**
