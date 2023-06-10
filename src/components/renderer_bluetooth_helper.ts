@@ -112,6 +112,7 @@ export class RendererBluetoothHelper {
         console.log("try connect service");
         // @ts-ignore
         this.selectDevice.gatt.connect();
+        console.log("connected service");
       } catch (e) {
         console.error("connect error", e);
         this._onDeviceConnect!(null);
@@ -119,7 +120,7 @@ export class RendererBluetoothHelper {
     }
     setTimeout(() => {
       this._connectService();
-    }, 2000);
+    }, 5000);
     return this.selectDevice;
   }
 
@@ -146,7 +147,7 @@ export class RendererBluetoothHelper {
         console.error("disconnect error", e);
       }
     }
-    ipcRenderer.send("cancel-bluetooth-request");
+    // ipcRenderer.send("cancel-bluetooth-request");
   }
 
   /**

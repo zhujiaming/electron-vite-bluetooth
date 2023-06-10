@@ -66,10 +66,10 @@ export class MainBlueToothHelper {
    * 销毁连接资源
    */
   destroy(): void {
-    if (this.selectBluetoothCallback) {
-      this.selectBluetoothCallback("");
-      this.selectBluetoothCallback = undefined;
-    }
+    // if (this.selectBluetoothCallback) {
+    // this.selectBluetoothCallback("");
+    // this.selectBluetoothCallback = undefined;
+    // }
     if (this.win) {
       this.win.removeAllListeners();
     }

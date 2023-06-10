@@ -33,13 +33,20 @@ function connectDevice() {
   renderBluetoothHelper.connectDevice(selectedDeviceId.value);
 }
 
+function disconnectDevice() {
+  console.log("disconnectDevice", selectedDeviceId.value);
+  if (connectDeviceInfo.value === "") return;
+  renderBluetoothHelper.disconnectDevice();
+  connectDeviceInfo.value = "";
+}
+
 /**
  * vue发送数据
  */
 function sendData() {
   receiveData.value =
     receiveData.value +
-    `\n${Utils.getFormatDateTime()}  发送：${toSendData.value}`;
+    `${Utils.getFormatDateTime()}  发送：${toSendData.value}\n`;
 
   console.log("sendData", toSendData.value);
   if (toSendData.value === "") return;
@@ -51,14 +58,14 @@ onMounted(() => {
   renderBluetoothHelper.init();
   renderBluetoothHelper.setCallbacks(
     (devices: Array<any>) => {
-      console.log("===>devices", devices);
+      // console.log("===>devices", devices);
       devicesRefs.value = devices;
     },
     (device: any) => {
       if (device == null || typeof device == "undefined") {
         connectDeviceInfo.value = "";
       } else {
-        connectDeviceInfo.value = `已连接：${device.deviceName}-${device.deviceId}`;
+        connectDeviceInfo.value = `已连接：${device.name}`;
       }
       console.log("deviceConnect", device);
     },
@@ -66,7 +73,7 @@ onMounted(() => {
       console.log("receve data:", data);
       receiveData.value = `${
         receiveData.value
-      }\n${Utils.getFormatDateTime()} 接收：${data}\n`;
+      }${Utils.getFormatDateTime()} 接收：${data}\n`;
     }
   );
 });
@@ -78,7 +85,11 @@ onMounted(() => {
   <input v-model="toSendData" placeholder="send data" /><br /><br />
   <button @click="refreshDevice">刷新设备</button>&nbsp;&nbsp;
   <button @click="connectDevice">连接设备</button>&nbsp;&nbsp;
-  <button @click="sendData">发送数据</button>
+  <button @click="sendData" v-show="connectDeviceInfo !== ''">发送数据</button
+  >&nbsp;&nbsp;
+  <button @click="disconnectDevice" v-show="connectDeviceInfo !== ''">
+    断开连接
+  </button>
   <br />
   <div>{{ connectDeviceInfo }}</div>
   <br />
@@ -111,5 +122,6 @@ onMounted(() => {
   text-align: left;
   font-size: 10px;
   border: 1px solid #ccc;
+  white-space: pre-wrap;
 }
 </style>
