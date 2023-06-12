@@ -55,6 +55,8 @@ function sendData() {
 
 // vue初始化完毕
 onMounted(() => {
+  //@ts-ignore
+  window.bleHelper = renderBluetoothHelper
   renderBluetoothHelper.init();
   renderBluetoothHelper.setCallbacks(
     (devices: Array<any>) => {

@@ -1,7 +1,7 @@
 {
   "name": "electron-vite-bluetooth-project",
   "private": true,
-  "version": "0.0.1",
+  "version": "1.0.0",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build && electron-builder",

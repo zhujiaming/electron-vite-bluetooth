@@ -158,13 +158,13 @@ export class RendererBluetoothHelper {
     if (this.characteristicsForSend) {
       console.log("chaacteristis sendData");
       //   const hexString = "DBF0A8010B464C534D20465232303000DFDE";
-      const bytes = atob(hexString)
-        .split("")
-        .map((byte) => byte.charCodeAt(0));
+      // const bytes = atob(hexString)
+      //   .split("")
+      //   .map((byte) => byte.charCodeAt(0));
       await this.characteristicsForSend.writeValueWithoutResponse(
         // @ts-ignore
-        // new Uint8Array(hexString)
-        new Uint8Array(bytes)
+        new Uint8Array(hexString)
+        // new Uint8Array(bytes)
       );
       console.log("sendData finish");
     } else {
