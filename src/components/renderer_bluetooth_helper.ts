@@ -106,21 +106,18 @@ export class RendererBluetoothHelper {
     // @ts-ignore
     const device = await navigator.bluetooth.requestDevice(config);
     this.selectDevice = device;
-    this._onDeviceConnect!(this.selectDevice);
     if (this.selectDevice) {
       try {
         console.log("try connect service");
         // @ts-ignore
-        this.selectDevice.gatt.connect();
+        await this.selectDevice.gatt.connect();
         console.log("connected service");
       } catch (e) {
         console.error("connect error", e);
         this._onDeviceConnect!(null);
       }
     }
-    setTimeout(() => {
-      this._connectService();
-    }, 5000);
+    await this._connectService();
     return this.selectDevice;
   }
 
@@ -158,13 +155,13 @@ export class RendererBluetoothHelper {
     if (this.characteristicsForSend) {
       console.log("chaacteristis sendData");
       //   const hexString = "DBF0A8010B464C534D20465232303000DFDE";
-      // const bytes = atob(hexString)
-      //   .split("")
-      //   .map((byte) => byte.charCodeAt(0));
+      const bytes = atob(hexString)
+        .split("")
+        .map((byte) => byte.charCodeAt(0));
       await this.characteristicsForSend.writeValueWithoutResponse(
         // @ts-ignore
-        new Uint8Array(hexString)
-        // new Uint8Array(bytes)
+        // new Uint8Array(hexString)
+        new Uint8Array(bytes)
       );
       console.log("sendData finish");
     } else {
@@ -189,7 +186,7 @@ export class RendererBluetoothHelper {
   }
 
   _getDeviceListChanagedLisenter() {
-    return this._onDeviceListChanged ?? function () {};
+    return this._onDeviceListChanged ?? function () { };
   }
 
   _removeDeviceListChanagedLisenter() {
@@ -221,8 +218,11 @@ export class RendererBluetoothHelper {
   //发送是用这个服务下的第一个特征值发送。接收是通过监听这个服务的第二个特征值
   _addEventListener() {
     if (this.selectCharacteristics) {
-      this.characteristicsForSend = this.selectCharacteristics[0];
-      this.characteristicsForListen = this.selectCharacteristics[1];
+      this.characteristicsForSend = this.selectCharacteristics[1];
+      this.characteristicsForListen = this.selectCharacteristics[0];
+
+      this._onDeviceConnect!(this.selectDevice);
+
       // console.log("chaacteristis", selectCharacteristics);
       if (this.characteristicsForListen) {
         console.log("characteristicsForListen addEventListener");
